@@ -210,10 +210,25 @@
             </section>
 
             <!-- KOLOM KANAN: Visualisasi Data -->
-            <section class="lg:col-span-8 flex flex-col gap-8 relative z-0">
+            <section class="lg:col-span-8 flex flex-col gap-6 relative z-0">
                 
-                <!-- Grafik Batang -->
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 sm:p-8">
+                <!-- FILTER TAMPILAN (DROPDOWN) -->
+                <div class="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-slate-200/60 p-4 sm:px-6">
+                    <span class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Filter Tampilan:
+                    </span>
+                    <select id="view-filter" onchange="toggleViewFilter()" class="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium rounded-lg focus:ring-slate-500 focus:border-slate-500 block py-2 px-3 outline-none cursor-pointer transition-colors hover:bg-slate-100 shadow-sm">
+                        <option value="both">Tampilkan Keduanya</option>
+                        <option value="chart">Hanya Diagram Batang</option>
+                        <option value="table">Hanya Tabel Turus</option>
+                    </select>
+                </div>
+
+                <!-- Grafik Batang (CONTAINER) -->
+                <div id="chart-container" class="bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 sm:p-8 block">
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-lg font-semibold text-slate-900">Distribusi Frekuensi</h2>
@@ -230,10 +245,10 @@
                     </div>
                 </div>
 
-                <!-- Tabel Data -->
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden">
+                <!-- Tabel Data (CONTAINER) -->
+                <div id="table-container" class="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden block">
                     <div class="px-6 sm:px-8 py-5 border-b border-slate-100">
-                        <h2 class="text-lg font-semibold text-slate-900">Tabel Rincian Data</h2>
+                        <h2 class="text-lg font-semibold text-slate-900">Tabel Turus & Rincian Data</h2>
                     </div>
                     
                     <div class="overflow-x-auto">
@@ -273,6 +288,24 @@
             renderTable();
             initChart();
         });
+
+        // FUNGSI BARU: Logika dropdown filter
+        function toggleViewFilter() {
+            const filterValue = document.getElementById('view-filter').value;
+            const chartCont = document.getElementById('chart-container');
+            const tableCont = document.getElementById('table-container');
+
+            if (filterValue === 'both') {
+                chartCont.style.display = 'block';
+                tableCont.style.display = 'block';
+            } else if (filterValue === 'chart') {
+                chartCont.style.display = 'block';
+                tableCont.style.display = 'none';
+            } else if (filterValue === 'table') {
+                chartCont.style.display = 'none';
+                tableCont.style.display = 'block';
+            }
+        }
 
         function generateTallyMarks(count) {
             let html = '<div class="flex flex-wrap gap-2 items-center py-1 min-h-[30px]">';
