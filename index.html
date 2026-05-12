@@ -1,27 +1,44 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- MENGAMBIL LOGO.PNG DARI GITHUB SEBAGAI IKON TAB -->
-    <link rel="icon" href="Logo.png" type="image/png">
-    
-    <title>Main Dadu Seru!</title>
-    
-    <!-- Google Fonts: Nunito (Font bulat ceria untuk anak-anak) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Nunito', 'sans-serif'] },
-                }
+/* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* =========================================
+           CINEMATIC MODE STYLES
+           =========================================
+        */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85); 
+            backdrop-filter: blur(4px);
+            z-index: 9000; /* DIPERBARUI: Ditinggikan untuk menutupi semua tombol dan tabel */
+            opacity: 0;
+            pointer-events: none; 
+            transition: opacity 0.4s ease;
+        }
+        
+        #overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .dice-scene.cinematic {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999; /* DIPERBARUI: Ditinggikan agar dadu melayang di atas overlay */
+            margin: 0; /* Mencegah posisi dadu bergeser */
+        }
+
+        .dice-scaler.cinematic-scale {
+            transform: scale(2.5) translateY(0);
+        }
             }
         }
     </script>
@@ -153,7 +170,11 @@
         }
     </style>
 </head>
-<!-- Latar belakang gradasi langit ceria -->
+<body class="bg-[#f8fafc] min-h-screen text-slate-800 antialiased selection:bg-slate-200">
+
+    <!-- OVERLAY DIPINDAHKAN KE SINI AGAR MENUTUPI SEMUA ELEMEN SECARA SEMPURNA -->
+    <div id="overlay"></div>
+
 <body class="bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 min-h-screen text-slate-800 antialiased selection:bg-yellow-300">
 
     <!-- FILTER TAMPILAN (KIRI ATAS) -->
@@ -189,13 +210,13 @@
             
             <section class="lg:col-span-4 lg:sticky lg:top-4 z-50 bg-white rounded-[2rem] shadow-xl border-4 border-indigo-100 p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
                 <!-- Ornamen awan di pojok -->
-                <div class="absolute -top-6 -right-6 w-24 h-24 bg-blue-100 rounded-full opacity-50 blur-xl"></div>
-                <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-pink-100 rounded-full opacity-50 blur-xl"></div>
+            <!-- KOLOM KIRI: Kontrol Dadu -->
+            <section class="lg:col-span-4 lg:sticky lg:top-8 z-50 bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 sm:p-8 flex flex-col justify-between">
+                
+                <div class="flex flex-col items-center">
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Area Uji Coba</div>
 
-                <div class="flex flex-col items-center relative z-10">
-                    <div class="text-sm font-black text-indigo-400 uppercase tracking-widest mb-2 bg-indigo-50 px-4 py-1 rounded-full">Area Main</div>
-                    
-                    <div id="overlay"></div>
+                    <!-- DADU CONTAINER -->
                     <div id="dice-placeholder" style="width: 100px; height: 100px; margin: 2rem auto; display: none;"></div>
                     
                     <div id="dice-scene" class="dice-scene">
@@ -439,10 +460,7 @@
 
         function highlightRow(angka) {
             const row = document.getElementById(`row-${angka}`);
-            row.classList.add('bg-yellow-100'); 
-            setTimeout(() => { row.classList.remove('bg-yellow-100'); }, 800);
-        }
-
+        // LOGIKA CINEMATIC ROLL
         function rollDice() {
             if (isRolling) return; 
             isRolling = true;
@@ -456,21 +474,24 @@
             const overlay = document.getElementById('overlay');
             const dicePlaceholder = document.getElementById('dice-placeholder');
             
-            // State Tombol Loading
+            // 1. Ubah tombol ke state loading
             rollBtn.disabled = true;
-            rollBtn.innerHTML = `⏳ Mengocok...`;
-            resultText.innerHTML = `<span class="animate-pulse text-indigo-500">Mantra dadu diputar... ✨</span>`;
+            rollBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengocok...`;
+            rollBtn.classList.add('opacity-90', 'cursor-not-allowed');
+            resultText.innerHTML = `<span class="animate-pulse">Memutar dadu...</span>`;
 
-            // Aktifkan Overlay Cinematic
-            overlay.classList.add('active'); 
+            // 2. AKTIFKAN MODE CINEMATIC
             dicePlaceholder.style.display = 'block'; 
             
-            setTimeout(() => {
-                diceScene.classList.add('cinematic');
-                diceScaler.classList.add('cinematic-scale');
-            }, 50);
+            // Pindahkan dadu secara paksa ke luar panel kiri agar tidak terhalang batas z-index
+            diceScene.classList.add('cinematic');
+            diceScaler.classList.add('cinematic-scale');
+            document.body.appendChild(diceScene);
 
-            // Hasil Angka Acak
+            // Tampilkan layar buram
+            overlay.classList.add('active'); 
+
+            // 3. Tentukan Hasil & Putaran
             const finalResultIndex = Math.floor(Math.random() * 6); 
             const angkaKeluar = finalResultIndex + 1;
             
@@ -493,18 +514,17 @@
 
             diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
 
-            // Selesai Animasi
+            // 4. SETELAH ANIMASI SELESAI
             setTimeout(() => {
                 overlay.classList.remove('active');
                 diceScaler.classList.remove('cinematic-scale');
                 diceScene.classList.remove('cinematic');
+                
+                // Kembalikan dadu ke dalam panel kiri (sebelum placeholder)
+                dicePlaceholder.parentNode.insertBefore(diceScene, dicePlaceholder);
                 dicePlaceholder.style.display = 'none';
 
-                // Teks Hasil Spesial
-                const pesanHeboh = ["Wah!", "Keren!", "Asik!", "Mantap!", "Yey!", "Hore!"];
-                const pesanRandom = pesanHeboh[Math.floor(Math.random() * pesanHeboh.length)];
-                
-                resultText.innerHTML = `${pesanRandom} Dapat angka <span class="font-black text-2xl text-pink-500 mx-1">${angkaKeluar}</span> 🎉`;
+                resultText.innerHTML = `Hasil: <span class="font-bold text-slate-900 ml-1 text-base">${angkaKeluar}</span>`;
 
                 frequencies[finalResultIndex]++;
                 totalRolls++;
