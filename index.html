@@ -468,8 +468,7 @@
             // Mulai animasi
             dicePlaceholder.style.display = 'block'; 
             diceScene.classList.add('cinematic');
-            diceScaler.classList.add('cinematic-scale');
-            document.body.appendChild(diceScene); // Pindah paksa keluar div
+            document.body.appendChild(diceScene); // Pindah paksa keluar div utama
             overlay.classList.add('active'); 
 
             // Hitung hasil acak
@@ -492,7 +491,12 @@
             currentRotX = targetX + (spinsX * 360);
             currentRotY = targetY + (spinsY * 360);
 
-            diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+            // JEDA PENTING: Browser butuh waktu sedikit (50ms) setelah memindahkan elemen (appendChild) 
+            // agar animasi CSS transisi kocokan dadu bisa berjalan dengan mulus.
+            setTimeout(() => {
+                diceScaler.classList.add('cinematic-scale');
+                diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
+            }, 50);
 
             // Setelah animasi berputar selesai
             setTimeout(() => {
