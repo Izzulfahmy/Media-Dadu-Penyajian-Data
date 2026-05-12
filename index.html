@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Lempar Dadu 3D & Tabel Frekuensi</title>
-    <!-- Menggunakan Tailwind CSS untuk desain yang cepat dan responsif -->
+    <title>Simulasi Lempar Dadu 3D & Analisis Data</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js untuk Diagram Batang -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Pengaturan Scene 3D */
         .dice-scene {
             width: 100px;
             height: 100px;
             perspective: 800px;
-            margin: 2rem auto;
+            margin: 1rem auto;
         }
 
         /* Efek melayang saat dadu dikocok */
@@ -71,135 +73,109 @@
             box-shadow: inset 0 3px 0 rgba(0,0,0,0.3);
         }
 
-        /* Konfigurasi Titik Dadu 1 */
-        .face-1 .pip { grid-area: 2 / 2 / 3 / 3; background: #ef4444; width: 22px; height: 22px; } /* Warna merah untuk angka 1 */
-
-        /* Konfigurasi Titik Dadu 2 */
-        .face-2 .p1 { grid-area: 1 / 3 / 2 / 4; }
-        .face-2 .p2 { grid-area: 3 / 1 / 4 / 2; }
-
-        /* Konfigurasi Titik Dadu 3 */
-        .face-3 .p1 { grid-area: 1 / 3 / 2 / 4; }
-        .face-3 .p2 { grid-area: 2 / 2 / 3 / 3; }
-        .face-3 .p3 { grid-area: 3 / 1 / 4 / 2; }
-
-        /* Konfigurasi Titik Dadu 4 */
-        .face-4 .p1 { grid-area: 1 / 1 / 2 / 2; }
-        .face-4 .p2 { grid-area: 1 / 3 / 2 / 4; }
-        .face-4 .p3 { grid-area: 3 / 1 / 4 / 2; }
-        .face-4 .p4 { grid-area: 3 / 3 / 4 / 4; }
-
-        /* Konfigurasi Titik Dadu 5 */
-        .face-5 .p1 { grid-area: 1 / 1 / 2 / 2; }
-        .face-5 .p2 { grid-area: 1 / 3 / 2 / 4; }
-        .face-5 .p3 { grid-area: 2 / 2 / 3 / 3; }
-        .face-5 .p4 { grid-area: 3 / 1 / 4 / 2; }
-        .face-5 .p5 { grid-area: 3 / 3 / 4 / 4; }
-
-        /* Konfigurasi Titik Dadu 6 */
-        .face-6 .p1 { grid-area: 1 / 1 / 2 / 2; }
-        .face-6 .p2 { grid-area: 2 / 1 / 3 / 2; }
-        .face-6 .p3 { grid-area: 3 / 1 / 4 / 2; }
-        .face-6 .p4 { grid-area: 1 / 3 / 2 / 4; }
-        .face-6 .p5 { grid-area: 2 / 3 / 3 / 4; }
-        .face-6 .p6 { grid-area: 3 / 3 / 4 / 4; }
+        /* Konfigurasi Titik Dadu */
+        .face-1 .pip { grid-area: 2 / 2 / 3 / 3; background: #ef4444; width: 22px; height: 22px; }
+        .face-2 .p1 { grid-area: 1 / 3 / 2 / 4; } .face-2 .p2 { grid-area: 3 / 1 / 4 / 2; }
+        .face-3 .p1 { grid-area: 1 / 3 / 2 / 4; } .face-3 .p2 { grid-area: 2 / 2 / 3 / 3; } .face-3 .p3 { grid-area: 3 / 1 / 4 / 2; }
+        .face-4 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-4 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-4 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-4 .p4 { grid-area: 3 / 3 / 4 / 4; }
+        .face-5 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-5 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-5 .p3 { grid-area: 2 / 2 / 3 / 3; } .face-5 .p4 { grid-area: 3 / 1 / 4 / 2; } .face-5 .p5 { grid-area: 3 / 3 / 4 / 4; }
+        .face-6 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-6 .p2 { grid-area: 2 / 1 / 3 / 2; } .face-6 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-6 .p4 { grid-area: 1 / 3 / 2 / 4; } .face-6 .p5 { grid-area: 2 / 3 / 3 / 4; } .face-6 .p6 { grid-area: 3 / 3 / 4 / 4; }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800">
 
-    <div class="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         
         <!-- Header -->
-        <div class="text-center mb-10">
+        <div class="text-center mb-8">
             <h1 class="text-3xl font-extrabold text-blue-700 sm:text-4xl">
-                Simulasi Lempar Dadu 3D
+                Simulasi Dadu & Analisis Data
             </h1>
-            <p class="mt-3 text-lg text-slate-500">
-                Klik tombol "Lempar Dadu", dan hasil angka yang keluar akan otomatis masuk ke dalam tabel data.
+            <p class="mt-2 text-slate-500">
+                Lempar dadu untuk mengumpulkan data, hasilnya akan divisualisasikan dalam tabel dan diagram.
             </p>
         </div>
 
-        <div class="flex flex-col lg:flex-row gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Area Dadu (Kiri) -->
-            <div class="flex-1 bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center justify-center border border-slate-200">
-                
+            <!-- Kolom Kiri: Area Dadu -->
+            <div class="lg:col-span-1 bg-white rounded-2xl shadow-md p-6 flex flex-col items-center justify-center border border-slate-200">
                 <!-- Elemen Dadu 3D -->
                 <div class="dice-scene">
                     <div id="dice-scaler" class="dice-scaler">
                         <div id="dice-cube" class="dice-cube">
-                            <!-- Angka 1 (Depan) -->
-                            <div class="dice-face front face-1">
-                                <div class="pip"></div>
-                            </div>
-                            <!-- Angka 2 (Kanan) -->
-                            <div class="dice-face right face-2">
-                                <div class="pip p1"></div><div class="pip p2"></div>
-                            </div>
-                            <!-- Angka 3 (Atas) -->
-                            <div class="dice-face top face-3">
-                                <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div>
-                            </div>
-                            <!-- Angka 4 (Bawah) -->
-                            <div class="dice-face bottom face-4">
-                                <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div>
-                            </div>
-                            <!-- Angka 5 (Kiri) -->
-                            <div class="dice-face left face-5">
-                                <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div>
-                            </div>
-                            <!-- Angka 6 (Belakang) -->
-                            <div class="dice-face back face-6">
-                                <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div><div class="pip p6"></div>
-                            </div>
+                            <div class="dice-face front face-1"><div class="pip"></div></div>
+                            <div class="dice-face right face-2"><div class="pip p1"></div><div class="pip p2"></div></div>
+                            <div class="dice-face top face-3"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div></div>
+                            <div class="dice-face bottom face-4"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div></div>
+                            <div class="dice-face left face-5"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div></div>
+                            <div class="dice-face back face-6"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div><div class="pip p6"></div></div>
                         </div>
                     </div>
                 </div>
                 
-                <h2 id="result-text" class="text-xl font-semibold text-slate-600 mt-6 mb-8 h-8">
+                <h2 id="result-text" class="text-lg font-semibold text-slate-600 mt-4 mb-6 h-8 text-center">
                     Silakan lempar dadu
                 </h2>
 
-                <button id="roll-btn" onclick="rollDice()" class="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md transition-colors text-lg flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button id="roll-btn" onclick="rollDice()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow transition-colors flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Lempar Dadu
                 </button>
-            </div>
 
-            <!-- Area Tabel (Kanan) -->
-            <div class="flex-1 bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col">
-                <div class="bg-blue-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-blue-800">Tabel Frekuensi Kemunculan</h3>
-                    <span id="total-rolls" class="bg-blue-200 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">Total: 0 Lemparan</span>
-                </div>
-                
-                <div class="p-6 flex-1 overflow-auto">
-                    <table class="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 text-center text-sm font-semibold text-slate-700 uppercase tracking-wider border-r border-slate-200 w-24">Angka</th>
-                                <th scope="col" class="px-4 py-3 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-r border-slate-200">Turus</th>
-                                <th scope="col" class="px-4 py-3 text-center text-sm font-semibold text-slate-700 uppercase tracking-wider w-24">Jumlah</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="bg-white divide-y divide-slate-200">
-                            <!-- Baris tabel akan di-generate oleh JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
+                <div class="mt-8 w-full border-t border-slate-200 pt-6">
+                    <!-- Toggle Tampilan (Opsional di layar kecil) -->
+                    <div class="flex justify-center gap-4 mb-4 lg:hidden">
+                        <button onclick="showView('table')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-300">Lihat Tabel</button>
+                        <button onclick="showView('chart')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-300">Lihat Diagram</button>
+                    </div>
 
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-200">
-                    <button onclick="resetData()" class="w-full px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <button onclick="resetData()" class="w-full px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 border border-red-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
-                        Reset Data
+                        Reset Semua Data
                     </button>
                 </div>
             </div>
 
+            <!-- Kolom Kanan: Area Data (Tabel & Diagram) -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                
+                <!-- Area Tabel -->
+                <div id="table-view" class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden flex flex-col">
+                    <div class="bg-blue-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+                        <h3 class="text-md font-bold text-blue-800">Tabel Frekuensi</h3>
+                        <span id="total-rolls" class="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide">0 Lemparan</span>
+                    </div>
+                    <div class="p-4 overflow-auto max-h-[300px] lg:max-h-none">
+                        <table class="min-w-full divide-y divide-slate-200 border border-slate-200 rounded-lg text-sm">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th scope="col" class="px-3 py-2 text-center font-semibold text-slate-700 w-16">Mata Dadu</th>
+                                    <th scope="col" class="px-3 py-2 text-left font-semibold text-slate-700 border-l border-slate-200">Turus (Tally)</th>
+                                    <th scope="col" class="px-3 py-2 text-center font-semibold text-slate-700 border-l border-slate-200 w-20">Frekuensi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="bg-white divide-y divide-slate-200">
+                                <!-- Baris tabel di-generate oleh JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Area Diagram -->
+                <div id="chart-view" class="bg-white rounded-2xl shadow-md border border-slate-200 p-5 flex flex-col items-center">
+                    <h3 class="text-md font-bold text-blue-800 mb-4 self-start">Diagram Batang</h3>
+                    <div class="w-full h-64 relative">
+                        <!-- Canvas untuk Chart.js -->
+                        <canvas id="frequencyChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -209,25 +185,50 @@
         let totalRolls = 0;
         let isRolling = false;
         
-        // Melacak rotasi absolut dari dadu 3D
         let currentRotX = 0;
         let currentRotY = 0;
 
-        // Karakter unicode dadu hanya untuk estetika di dalam tabel
+        let myChart = null; // Menyimpan instance grafik
+
         const diceFacesTable = ['&#9856;', '&#9857;', '&#9858;', '&#9859;', '&#9860;', '&#9861;'];
 
         document.addEventListener('DOMContentLoaded', () => {
             renderTable();
+            initChart();
         });
 
-        // Menggambar Turus (Tally Marks) SVG
+        // Toggle View untuk mobile
+        function showView(view) {
+            const tableView = document.getElementById('table-view');
+            const chartView = document.getElementById('chart-view');
+            
+            if (window.innerWidth < 1024) { // Hanya berlaku di mobile/tablet
+                if (view === 'table') {
+                    tableView.style.display = 'flex';
+                    chartView.style.display = 'none';
+                } else {
+                    tableView.style.display = 'none';
+                    chartView.style.display = 'flex';
+                }
+            }
+        }
+
+        // Pastikan keduanya tampil di layar besar jika di-resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('table-view').style.display = 'flex';
+                document.getElementById('chart-view').style.display = 'flex';
+            }
+        });
+
+        // Menggambar Turus SVG
         function generateTallyMarks(count) {
-            let html = '<div class="flex flex-wrap gap-2 items-center">';
+            let html = '<div class="flex flex-wrap gap-1 items-center min-h-[28px]">';
             let fullGroups = Math.floor(count / 5);
             let remainder = count % 5;
 
             const svg5 = `
-                <svg width="28" height="28" viewBox="0 0 28 28" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round">
+                <svg width="24" height="24" viewBox="0 0 28 28" stroke="#334155" stroke-width="2" stroke-linecap="round">
                     <line x1="5" y1="4" x2="5" y2="24"/>
                     <line x1="10" y1="4" x2="10" y2="24"/>
                     <line x1="15" y1="4" x2="15" y2="24"/>
@@ -235,18 +236,81 @@
                     <line x1="2" y1="24" x2="23" y2="4"/> 
                 </svg>
             `;
-            
             const svg1 = `
-                <svg width="6" height="28" viewBox="0 0 6 28" stroke="#1e293b" stroke-width="2.5" stroke-linecap="round">
+                <svg width="5" height="24" viewBox="0 0 6 28" stroke="#334155" stroke-width="2" stroke-linecap="round">
                     <line x1="3" y1="4" x2="3" y2="24"/>
                 </svg>
             `;
+
+            if (count === 0) return '<span class="text-slate-300 italic text-xs">Belum ada</span>';
 
             for (let i = 0; i < fullGroups; i++) { html += svg5; }
             for (let i = 0; i < remainder; i++) { html += svg1; }
             
             html += '</div>';
             return html;
+        }
+
+        // Inisialisasi Chart.js
+        function initChart() {
+            const ctx = document.getElementById('frequencyChart').getContext('2d');
+            
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Angka 1', 'Angka 2', 'Angka 3', 'Angka 4', 'Angka 5', 'Angka 6'],
+                    datasets: [{
+                        label: 'Frekuensi Kemunculan',
+                        data: frequencies,
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',  // Merah
+                            'rgba(59, 130, 246, 0.7)', // Biru
+                            'rgba(16, 185, 129, 0.7)', // Hijau
+                            'rgba(245, 158, 11, 0.7)', // Kuning
+                            'rgba(139, 92, 246, 0.7)', // Ungu
+                            'rgba(14, 165, 233, 0.7)'  // Sky Blue
+                        ],
+                        borderColor: [
+                            'rgb(239, 68, 68)',
+                            'rgb(59, 130, 246)',
+                            'rgb(16, 185, 129)',
+                            'rgb(245, 158, 11)',
+                            'rgb(139, 92, 246)',
+                            'rgb(14, 165, 233)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1 // Sumbu Y hanya menampilkan angka bulat
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // Sembunyikan legenda karena warna sudah jelas
+                        }
+                    },
+                    animation: {
+                        duration: 500 // Durasi animasi update grafik
+                    }
+                }
+            });
+        }
+
+        // Memperbarui data grafik
+        function updateChart() {
+            if (myChart) {
+                myChart.data.datasets[0].data = frequencies;
+                myChart.update();
+            }
         }
 
         function renderTable() {
@@ -259,24 +323,24 @@
                 
                 const tr = document.createElement('tr');
                 tr.id = `row-${angka}`;
-                tr.className = 'transition-colors duration-500'; 
+                tr.className = 'transition-colors duration-500 hover:bg-slate-50'; 
 
                 tr.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-center border-r border-slate-200">
-                        <div class="text-2xl">${diceFacesTable[i]}</div>
+                    <td class="px-3 py-2 whitespace-nowrap text-center">
+                        <div class="text-xl">${diceFacesTable[i]}</div>
                         <div class="font-bold text-slate-700">${angka}</div>
                     </td>
-                    <td class="px-4 py-3 border-r border-slate-200 min-h-[50px]">
+                    <td class="px-3 py-2 border-l border-slate-200">
                         ${generateTallyMarks(jumlah)}
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap text-center text-lg font-bold text-blue-600">
+                    <td class="px-3 py-2 whitespace-nowrap text-center text-lg font-bold text-blue-600 border-l border-slate-200">
                         ${jumlah}
                     </td>
                 `;
                 tbody.appendChild(tr);
             }
 
-            document.getElementById('total-rolls').innerText = `Total: ${totalRolls} Lemparan`;
+            document.getElementById('total-rolls').innerText = `${totalRolls} Lemparan`;
         }
 
         function highlightRow(angka) {
@@ -287,7 +351,6 @@
             }, 600);
         }
 
-        // Logika Lempar Dadu 3D
         function rollDice() {
             if (isRolling) return; 
             isRolling = true;
@@ -301,73 +364,66 @@
             rollBtn.classList.add('opacity-50', 'cursor-not-allowed');
             resultText.innerText = "Mengocok dadu...";
 
-            // Menambahkan efek dadu terlempar (skala membesar)
             diceScaler.classList.add('rolling');
 
-            // Menentukan hasil dadu (0 sampai 5)
             const finalResultIndex = Math.floor(Math.random() * 6); 
-            const angkaKeluar = finalResultIndex + 1; // 1 sampai 6
+            const angkaKeluar = finalResultIndex + 1;
             
-            // Menentukan arah putaran X dan Y berdasarkan angka yang keluar
             let targetX = 0, targetY = 0;
             switch(angkaKeluar) {
-                case 1: targetX = 0; targetY = 0; break;      // Depan
-                case 2: targetX = 0; targetY = -90; break;    // Kanan
-                case 3: targetX = -90; targetY = 0; break;    // Atas
-                case 4: targetX = 90; targetY = 0; break;     // Bawah
-                case 5: targetX = 0; targetY = 90; break;     // Kiri
-                case 6: targetX = 180; targetY = 0; break;    // Belakang
+                case 1: targetX = 0; targetY = 0; break;      
+                case 2: targetX = 0; targetY = -90; break;    
+                case 3: targetX = -90; targetY = 0; break;    
+                case 4: targetX = 90; targetY = 0; break;     
+                case 5: targetX = 0; targetY = 90; break;     
+                case 6: targetX = 180; targetY = 0; break;    
             }
 
-            // Menghitung berapa banyak putaran penuh (360 derajat) yang sudah dilakukan sebelumnya
             let spinsX = Math.floor(currentRotX / 360);
             let spinsY = Math.floor(currentRotY / 360);
 
-            // Menambahkan putaran liar (2 sampai 4 putaran tambahan setiap kali dikocok)
             spinsX += (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 2);
             spinsY += (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 2);
 
-            // Set rotasi baru
             currentRotX = targetX + (spinsX * 360);
             currentRotY = targetY + (spinsY * 360);
 
-            // Terapkan animasi CSS
             diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
 
-            // Tunggu animasi CSS selesai (sekitar 1.2 detik)
             setTimeout(() => {
-                diceScaler.classList.remove('rolling'); // Hilangkan efek melayang
+                diceScaler.classList.remove('rolling'); 
 
                 resultText.innerHTML = `Mendapatkan Angka <span class="font-bold text-blue-600 text-2xl">${angkaKeluar}</span>`;
 
-                // Update Data Tabel
+                // Update Data
                 frequencies[finalResultIndex]++;
                 totalRolls++;
+                
+                // Update UI
                 renderTable();
                 highlightRow(angkaKeluar);
+                updateChart(); // Panggil fungsi update grafik
 
-                // Kembalikan status tombol
                 isRolling = false;
                 rollBtn.disabled = false;
                 rollBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }, 1200); 
         }
 
-        // Fungsi Reset Data
         function resetData() {
             if (totalRolls === 0) return;
             
-            if (confirm("Apakah Anda yakin ingin mereset semua data tabel ini?")) {
+            if (confirm("Apakah Anda yakin ingin mereset semua data tabel dan grafik?")) {
                 frequencies = [0, 0, 0, 0, 0, 0];
                 totalRolls = 0;
                 document.getElementById('result-text').innerText = "Silakan lempar dadu";
-                 
-                // Reset posisi dadu ke angka 1
+                
                 currentRotX = 0;
                 currentRotY = 0;
                 document.getElementById('dice-cube').style.transform = `rotateX(0deg) rotateY(0deg)`;
                 
                 renderTable();
+                updateChart(); // Reset grafik
             }
         }
     </script>
