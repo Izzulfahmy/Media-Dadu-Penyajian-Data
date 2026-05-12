@@ -26,30 +26,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Scene Dadu 3D */
+        /* Base Scene Dadu 3D */
         .dice-scene {
             width: 90px;
             height: 90px;
             perspective: 1000px;
             margin: 2rem auto;
+            position: relative; /* Penting untuk transisi ke full screen */
+            z-index: 10;
         }
 
         .dice-scaler {
             width: 100%;
             height: 100%;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Transisi mulus untuk perubahan skala dan posisi */
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
-        .dice-scaler.rolling {
-            transform: scale(1.3) translateY(-15px);
-        }
-
         .dice-cube {
             width: 100%;
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            /* Transisi untuk rotasi 3D */
+            transition: transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             transform: rotateX(0deg) rotateY(0deg);
         }
 
@@ -71,7 +71,7 @@
             backface-visibility: hidden;
         }
 
-        /* Posisi 3D */
+        /* Posisi 3D Sisi Dadu */
         .dice-face.front  { transform: rotateY(0deg) translateZ(45px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(45px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(45px); }
@@ -79,55 +79,102 @@
         .dice-face.top    { transform: rotateX(90deg) translateZ(45px); }
         .dice-face.bottom { transform: rotateX(-90deg) translateZ(45px); }
 
-        /* Titik (Pips) Elegan */
+        /* Titik (Pips) */
         .pip {
             width: 16px;
             height: 16px;
             background: #1e293b;
             border-radius: 50%;
         }
-
-        /* Angka 1 dibuat warna merah aksen */
         .face-1 .pip { grid-area: 2 / 2 / 3 / 3; background: #ef4444; width: 20px; height: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        
         .face-2 .p1 { grid-area: 1 / 3 / 2 / 4; } .face-2 .p2 { grid-area: 3 / 1 / 4 / 2; }
         .face-3 .p1 { grid-area: 1 / 3 / 2 / 4; } .face-3 .p2 { grid-area: 2 / 2 / 3 / 3; } .face-3 .p3 { grid-area: 3 / 1 / 4 / 2; }
         .face-4 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-4 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-4 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-4 .p4 { grid-area: 3 / 3 / 4 / 4; }
         .face-5 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-5 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-5 .p3 { grid-area: 2 / 2 / 3 / 3; } .face-5 .p4 { grid-area: 3 / 1 / 4 / 2; } .face-5 .p5 { grid-area: 3 / 3 / 4 / 4; }
         .face-6 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-6 .p2 { grid-area: 2 / 1 / 3 / 2; } .face-6 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-6 .p4 { grid-area: 1 / 3 / 2 / 4; } .face-6 .p5 { grid-area: 2 / 3 / 3 / 4; } .face-6 .p6 { grid-area: 3 / 3 / 4 / 4; }
 
-        /* Custom Scrollbar untuk tabel */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* =========================================
+           CINEMATIC MODE STYLES
+           =========================================
+        */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.85); /* Gelap transparan */
+            backdrop-filter: blur(4px);
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none; /* Tidak bisa diklik saat tidak aktif */
+            transition: opacity 0.4s ease;
+        }
+        
+        #overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Kelas yang ditambahkan ke scene dadu saat mode cinematic */
+        .dice-scene.cinematic {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 60;
+        }
+
+        /* Dadu membesar secara ekstrem saat di tengah layar */
+        .dice-scaler.cinematic-scale {
+            transform: scale(2.5) translateY(0);
+        }
+
+        /* Media query agar di HP tidak terlalu besar menutupi layar penuh */
+        @media (max-width: 640px) {
+            .dice-scaler.cinematic-scale {
+                transform: scale(2) translateY(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-[#f8fafc] min-h-screen text-slate-800 antialiased selection:bg-slate-200">
 
-    <div class="max-w-6xl mx-auto py-8 px-5 sm:px-8 lg:py-12">
+    <!-- OVERLAY UNTUK EFEK CINEMATIC -->
+    <div id="overlay"></div>
+
+    <div class="max-w-6xl mx-auto py-8 px-5 sm:px-8 lg:py-12 relative z-10">
         
-        <!-- Header Minimalis -->
-        <header class="mb-10 lg:mb-14">
+        <!-- Header -->
+        <header class="mb-10 lg:mb-14 text-center lg:text-left">
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 Simulasi Probabilitas Dadu
             </h1>
-            <p class="mt-2 text-slate-500 text-sm sm:text-base max-w-2xl">
-                Lakukan pengujian lempar dadu untuk mengumpulkan data frekuensi. Hasil akan divisualisasikan secara *real-time*.
+            <p class="mt-2 text-slate-500 text-sm sm:text-base max-w-2xl mx-auto lg:mx-0">
+                Lakukan pengujian lempar dadu untuk mengumpulkan data frekuensi. Hasil akan divisualisasikan secara langsung.
             </p>
         </header>
 
         <!-- Layout Utama: Grid -->
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             
-            <!-- KOLOM KIRI: Kontrol Dadu (Sticky di Desktop) -->
+            <!-- KOLOM KIRI: Kontrol Dadu -->
             <section class="lg:col-span-4 lg:sticky lg:top-8 bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 sm:p-8 flex flex-col justify-between">
                 
                 <div class="flex flex-col items-center">
                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Area Uji Coba</div>
                     
-                    <!-- Dadu -->
-                    <div class="dice-scene">
+                    <!-- DADU CONTAINER -->
+                    <!-- Placeholder untuk menahan posisi layout saat dadu terbang ke tengah layar -->
+                    <div id="dice-placeholder" style="width: 90px; height: 90px; margin: 2rem auto; display: none;"></div>
+                    
+                    <div id="dice-scene" class="dice-scene">
                         <div id="dice-scaler" class="dice-scaler">
                             <div id="dice-cube" class="dice-cube">
                                 <div class="dice-face front face-1"><div class="pip"></div></div>
@@ -140,14 +187,14 @@
                         </div>
                     </div>
                     
-                    <!-- Hasil Teks Elegan -->
+                    <!-- Hasil Teks -->
                     <div class="h-14 flex items-center justify-center w-full mt-2 mb-6 bg-slate-50 rounded-xl border border-slate-100">
                         <span id="result-text" class="text-sm font-medium text-slate-500">
                             Menunggu lemparan...
                         </span>
                     </div>
 
-                    <!-- Tombol Utama -->
+                    <!-- Tombol Lempar -->
                     <button id="roll-btn" onclick="rollDice()" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 active:transform active:scale-[0.98] transition-all text-white font-medium rounded-xl shadow-md shadow-slate-900/10 flex items-center justify-center gap-2 text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -156,10 +203,8 @@
                     </button>
                 </div>
 
-                <!-- Pemisah -->
                 <hr class="border-slate-100 my-6">
 
-                <!-- Tombol Reset -->
                 <button onclick="resetData()" class="w-full py-2.5 bg-white hover:bg-slate-50 text-slate-600 font-medium rounded-xl transition-colors flex items-center justify-center gap-2 border border-slate-200 text-sm">
                     Reset Data
                 </button>
@@ -186,7 +231,7 @@
                     </div>
                 </div>
 
-                <!-- Tabel Data Clean -->
+                <!-- Tabel Data -->
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200/60 overflow-hidden">
                     <div class="px-6 sm:px-8 py-5 border-b border-slate-100">
                         <h2 class="text-lg font-semibold text-slate-900">Tabel Rincian Data</h2>
@@ -223,7 +268,6 @@
 
         let myChart = null; 
 
-        // Ikon minimalis untuk tabel
         const diceFacesTable = ['&#9856;', '&#9857;', '&#9858;', '&#9859;', '&#9860;', '&#9861;'];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -231,13 +275,10 @@
             initChart();
         });
 
-        // Menggambar Turus (Tally Marks) SVG yang lebih rapi
         function generateTallyMarks(count) {
             let html = '<div class="flex flex-wrap gap-2 items-center py-1 min-h-[30px]">';
             let fullGroups = Math.floor(count / 5);
             let remainder = count % 5;
-
-            // Stroke color disesuaikan dengan tema elegan
             const strokeColor = "#475569"; 
             
             const svg5 = `
@@ -259,15 +300,12 @@
 
             for (let i = 0; i < fullGroups; i++) { html += svg5; }
             for (let i = 0; i < remainder; i++) { html += svg1; }
-            
             html += '</div>';
             return html;
         }
 
-        // Konfigurasi Chart.js Minimalis
         function initChart() {
             const ctx = document.getElementById('frequencyChart').getContext('2d');
-            
             Chart.defaults.font.family = "'Inter', sans-serif";
             Chart.defaults.color = '#64748b';
 
@@ -278,9 +316,9 @@
                     datasets: [{
                         label: 'Frekuensi',
                         data: frequencies,
-                        backgroundColor: '#1e293b', // Warna gelap elegan
+                        backgroundColor: '#1e293b',
                         borderRadius: 6,
-                        barPercentage: 0.6 // Membuat batang lebih ramping
+                        barPercentage: 0.6 
                     }]
                 },
                 options: {
@@ -290,14 +328,8 @@
                         y: {
                             beginAtZero: true,
                             border: { display: false },
-                            grid: {
-                                color: '#f1f5f9',
-                                drawTicks: false
-                            },
-                            ticks: {
-                                stepSize: 1,
-                                padding: 10
-                            }
+                            grid: { color: '#f1f5f9', drawTicks: false },
+                            ticks: { stepSize: 1, padding: 10 }
                         },
                         x: {
                             border: { display: false },
@@ -316,10 +348,7 @@
                             bodyFont: { size: 14, weight: 'bold' }
                         }
                     },
-                    animation: {
-                        duration: 500,
-                        easing: 'easeOutQuart'
-                    }
+                    animation: { duration: 500, easing: 'easeOutQuart' }
                 }
             });
         }
@@ -338,7 +367,6 @@
             for (let i = 0; i < 6; i++) {
                 const angka = i + 1;
                 const jumlah = frequencies[i];
-                
                 const tr = document.createElement('tr');
                 tr.id = `row-${angka}`;
                 tr.className = 'transition-colors duration-500 hover:bg-slate-50/80 group'; 
@@ -350,9 +378,7 @@
                             <span class="font-medium text-slate-900">${angka}</span>
                         </div>
                     </td>
-                    <td class="px-6 sm:px-8 py-3">
-                        ${generateTallyMarks(jumlah)}
-                    </td>
+                    <td class="px-6 sm:px-8 py-3">${generateTallyMarks(jumlah)}</td>
                     <td class="px-6 sm:px-8 py-3 text-right">
                         <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-sm group-hover:bg-slate-200 transition-colors">
                             ${jumlah}
@@ -361,43 +387,47 @@
                 `;
                 tbody.appendChild(tr);
             }
-
             document.getElementById('total-rolls-badge').innerText = `${totalRolls} Total`;
         }
 
-        // Efek highlight baris tabel yang baru diupdate
         function highlightRow(angka) {
             const row = document.getElementById(`row-${angka}`);
-            row.classList.add('bg-blue-50/50'); // Highlight biru sangat tipis
-            setTimeout(() => {
-                row.classList.remove('bg-blue-50/50');
-            }, 800);
+            row.classList.add('bg-blue-50/50'); 
+            setTimeout(() => { row.classList.remove('bg-blue-50/50'); }, 800);
         }
 
+        // LOGIKA CINEMATIC ROLL
         function rollDice() {
             if (isRolling) return; 
             isRolling = true;
             
             const resultText = document.getElementById('result-text');
             const rollBtn = document.getElementById('roll-btn');
+            
+            // Elemen untuk mode cinematic
+            const diceScene = document.getElementById('dice-scene');
             const diceScaler = document.getElementById('dice-scaler');
             const diceCube = document.getElementById('dice-cube');
+            const overlay = document.getElementById('overlay');
+            const dicePlaceholder = document.getElementById('dice-placeholder');
             
-            // Status tombol loading
+            // 1. Ubah tombol ke state loading
             rollBtn.disabled = true;
-            rollBtn.innerHTML = `
-                <svg class="animate-spin h-5 w-5 text-white opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Mengocok...
-            `;
+            rollBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Mengocok...`;
             rollBtn.classList.add('opacity-90', 'cursor-not-allowed');
+            resultText.innerHTML = `<span class="animate-pulse">Memutar dadu...</span>`;
+
+            // 2. AKTIFKAN MODE CINEMATIC
+            overlay.classList.add('active'); // Gelapkan background
+            dicePlaceholder.style.display = 'block'; // Tahan layout yang ditinggalkan dadu
             
-            resultText.innerHTML = `<span class="animate-pulse">Sedang mengacak...</span>`;
+            // Beri jeda sangat kecil agar transisi posisi terlihat mulus (dari relatif ke fixed)
+            setTimeout(() => {
+                diceScene.classList.add('cinematic');
+                diceScaler.classList.add('cinematic-scale');
+            }, 50);
 
-            diceScaler.classList.add('rolling');
-
+            // 3. Tentukan Hasil & Putaran
             const finalResultIndex = Math.floor(Math.random() * 6); 
             const angkaKeluar = finalResultIndex + 1;
             
@@ -411,28 +441,30 @@
                 case 6: targetX = 180; targetY = 0; break;    
             }
 
-            let spinsX = Math.floor(currentRotX / 360);
-            let spinsY = Math.floor(currentRotY / 360);
-
-            spinsX += (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 2);
-            spinsY += (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 2);
+            // Tambah putaran liar (lebih banyak putaran karena ada mode cinematic)
+            let spinsX = Math.floor(currentRotX / 360) + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 4) + 3);
+            let spinsY = Math.floor(currentRotY / 360) + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 4) + 3);
 
             currentRotX = targetX + (spinsX * 360);
             currentRotY = targetY + (spinsY * 360);
 
+            // Putar dadu di tengah layar
             diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
 
+            // 4. SETELAH ANIMASI SELESAI (1.5 detik), KEMBALIKAN KE TEMPAT SEMULA
             setTimeout(() => {
-                diceScaler.classList.remove('rolling'); 
+                // Matikan mode cinematic
+                overlay.classList.remove('active');
+                diceScaler.classList.remove('cinematic-scale');
+                diceScene.classList.remove('cinematic');
+                dicePlaceholder.style.display = 'none';
 
-                // Menampilkan hasil dengan elegan
+                // Update teks hasil
                 resultText.innerHTML = `Hasil: <span class="font-bold text-slate-900 ml-1 text-base">${angkaKeluar}</span>`;
 
-                // Update Data
+                // Update Data & UI
                 frequencies[finalResultIndex]++;
                 totalRolls++;
-                
-                // Update UI
                 renderTable();
                 highlightRow(angkaKeluar);
                 updateChart(); 
@@ -441,27 +473,19 @@
                 isRolling = false;
                 rollBtn.disabled = false;
                 rollBtn.classList.remove('opacity-90', 'cursor-not-allowed');
-                rollBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Lempar Dadu
-                `;
-            }, 1200); 
+                rollBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Lempar Dadu`;
+            }, 1600); // 1.6 detik (menyesuaikan durasi transisi css)
         }
 
         function resetData() {
             if (totalRolls === 0) return;
-            
             if (confirm("Reset seluruh data pengujian?")) {
                 frequencies = [0, 0, 0, 0, 0, 0];
                 totalRolls = 0;
                 document.getElementById('result-text').innerHTML = `<span class="text-sm font-medium text-slate-500">Menunggu lemparan...</span>`;
-                
                 currentRotX = 0;
                 currentRotY = 0;
                 document.getElementById('dice-cube').style.transform = `rotateX(0deg) rotateY(0deg)`;
-                
                 renderTable();
                 updateChart(); 
             }
@@ -469,11 +493,3 @@
     </script>
 </body>
 </html>
-```eof
-
-### Apa yang Terasa Berbeda di Versi Ini?
-*   **Kesederhanaan (Less is More):** Kotak-kotak tabel tidak lagi dikelilingi garis tebal (`border`), cukup garis bawah tipis antar baris.
-*   **Warna yang Disengaja:** Tombol warna hitam keabu-abuan (`bg-slate-900`) memberikan kontras yang mewah layaknya *dashboard software* profesional seperti Vercel atau Stripe.
-*   **Tipografi:** Penambahan font **Inter** membuat perbedaan yang luar biasa. Angka dan huruf terlihat lebih proporsional.
-*   **Animasi Tombol:** Saat tombol diklik, kini ada animasi berputar (*loading spinner*) dan teks "Mengocok..." yang memberikan umpan balik (UX) yang sangat baik kepada pengguna.
-*   **Dadu yang Halus:** Dadu kini sedikit lebih membulat dengan bayangan (*shadow*) halus dan angka **1** diberi aksen titik merah kecil untuk memberikan sentuhan asimetris yang manis.
