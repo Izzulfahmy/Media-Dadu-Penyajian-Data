@@ -156,6 +156,17 @@
 <!-- Latar belakang gradasi langit ceria -->
 <body class="bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 min-h-screen text-slate-800 antialiased selection:bg-yellow-300">
 
+    <!-- FILTER TAMPILAN (KIRI ATAS) -->
+    <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 p-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 hover:scale-105 transition-all flex items-center gap-1 sm:gap-2">
+        <span class="hidden md:inline text-sm font-bold text-indigo-800">👀 Tampilan:</span>
+        <select id="view-filter" onchange="toggleViewFilter()" class="bg-transparent text-indigo-700 text-xs sm:text-sm font-black outline-none cursor-pointer appearance-none text-center pr-2">
+            <option value="both">Tabel & Grafik 📊</option>
+            <option value="chart">Hanya Grafik 📈</option>
+            <option value="table">Hanya Tabel 📝</option>
+        </select>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+    </div>
+
     <!-- TOMBOL LAYAR PENUH (FULLSCREEN) -->
     <button onclick="toggleFullScreen()" class="fixed top-3 right-3 sm:top-5 sm:right-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 text-indigo-700 p-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 hover:scale-105 font-black flex items-center gap-2 transition-all">
         <svg id="fs-icon-enter" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
@@ -165,7 +176,7 @@
 
     <div class="max-w-6xl mx-auto py-4 px-4 sm:px-8 lg:py-6">
         
-        <header class="mb-6 lg:mb-8 text-center pt-10 sm:pt-0">
+        <header class="mb-6 lg:mb-8 text-center pt-14 sm:pt-0">
             <h1 class="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-500 to-pink-500 drop-shadow-sm tracking-tight mb-2 sm:mb-3">
                 Ayo Main Lempar Dadu! 🎲
             </h1>
@@ -214,28 +225,16 @@
 
                 <hr class="border-indigo-100 border-dashed border-2 my-5 relative z-10">
 
-                <button onclick="resetData()" class="w-full py-2 sm:py-3 bg-white hover:bg-red-50 text-red-500 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 border-2 border-red-200 text-sm sm:text-base relative z-10 shadow-sm hover:border-red-400">
-                    🗑️ Mulai Dari Awal
-                </button>
-            </section>
+            <button onclick="resetData()" class="w-full py-2 sm:py-3 bg-white hover:bg-red-50 text-red-500 font-bold rounded-2xl transition-colors flex items-center justify-center gap-2 border-2 border-red-200 text-sm sm:text-base relative z-10 shadow-sm hover:border-red-400">
+                🗑️ Mulai Dari Awal
+            </button>
+        </section>
 
-            <section class="lg:col-span-8 flex flex-col gap-6 relative z-0">
-                
-                <!-- Filter Dropdown Lucu -->
-                <div class="flex items-center justify-between bg-white/80 backdrop-blur-md rounded-2xl shadow-sm border-2 border-white p-4 sm:px-6">
-                    <span class="text-base font-bold text-indigo-800 flex items-center gap-2">
-                        👀 Mau lihat apa?
-                    </span>
-                    <select id="view-filter" onchange="toggleViewFilter()" class="bg-indigo-50 border-2 border-indigo-200 text-indigo-700 text-base font-bold rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block py-2.5 px-4 outline-none cursor-pointer transition-colors hover:bg-indigo-100 shadow-sm appearance-none">
-                        <option value="both">Tabel & Grafik 📊</option>
-                        <option value="chart">Hanya Grafik 📈</option>
-                        <option value="table">Hanya Tabel 📝</option>
-                    </select>
-                </div>
-
-                <!-- Grafik Batang -->
-                <div id="chart-container" class="bg-white rounded-[2rem] shadow-xl border-4 border-cyan-300 p-6 sm:p-8 block relative overflow-hidden">
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-50 rounded-full opacity-50 blur-2xl"></div>
+        <section class="lg:col-span-8 flex flex-col gap-6 relative z-0">
+            
+            <!-- Grafik Batang -->
+            <div id="chart-container" class="bg-white rounded-[2rem] shadow-xl border-4 border-cyan-300 p-6 sm:p-8 block relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-50 rounded-full opacity-50 blur-2xl"></div>
                     
                     <div class="flex items-center justify-between mb-6 relative z-10">
                         <div>
