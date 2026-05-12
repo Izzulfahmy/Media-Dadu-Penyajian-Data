@@ -28,9 +28,9 @@
     <style>
         /* Base Scene Dadu 3D */
         .dice-scene {
-            width: 100px; /* Diperbesar sedikit agar lebih solid */
+            width: 100px; 
             height: 100px;
-            perspective: 800px; /* Kedalaman 3D diperkuat */
+            perspective: 800px; 
             margin: 2rem auto;
             position: relative; 
             z-index: 50; 
@@ -56,12 +56,9 @@
             position: absolute;
             width: 100px;
             height: 100px;
-            /* Gradasi warna meniru jatuhnya cahaya pada material plastik */
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            /* Border tebal sewarna background untuk menutup celah antar sisi */
             border: 2px solid #cbd5e1; 
-            border-radius: 18px; /* Sudut membulat khas dadu */
-            /* Shadow kompleks: meniru ketebalan, cahaya masuk, dan batas luar */
+            border-radius: 18px; 
             box-shadow: 
                 inset 0 0 20px rgba(0,0,0,0.1), 
                 inset 0 0 5px rgba(255,255,255,0.8),
@@ -72,12 +69,11 @@
             padding: 12px;
             justify-items: center;
             align-items: center;
-            /* Trik agar jika ada celah, terlihat gelap (padat) bukan tembus pandang */
             backface-visibility: hidden;
             background-color: #0f172a; 
         }
 
-        /* Posisi 3D Sisi Dadu (Jarak z disesuaikan dengan setengah ukuran lebar) */
+        /* Posisi 3D Sisi Dadu */
         .dice-face.front  { transform: rotateY(0deg) translateZ(50px); }
         .dice-face.right  { transform: rotateY(90deg) translateZ(50px); }
         .dice-face.back   { transform: rotateY(180deg) translateZ(50px); }
@@ -91,7 +87,6 @@
             height: 18px;
             background: #1e293b;
             border-radius: 50%;
-            /* Shadow di dalam pips untuk efek diukir ke dalam */
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.8);
         }
         
@@ -118,11 +113,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(15, 23, 42, 0.85); /* Gelap transparan */
+            background: rgba(15, 23, 42, 0.85); 
             backdrop-filter: blur(4px);
-            z-index: 40; /* DIPERBARUI: Angka 40 agar dadu (50) bisa berada di atasnya */
+            z-index: 40; 
             opacity: 0;
-            pointer-events: none; /* Tidak bisa diklik saat tidak aktif */
+            pointer-events: none; 
             transition: opacity 0.4s ease;
         }
         
@@ -131,7 +126,6 @@
             pointer-events: auto;
         }
 
-        /* Kelas yang ditambahkan ke scene dadu saat mode cinematic */
         .dice-scene.cinematic {
             position: fixed;
             top: 50%;
@@ -140,12 +134,10 @@
             z-index: 60;
         }
 
-        /* Dadu membesar secara ekstrem saat di tengah layar */
         .dice-scaler.cinematic-scale {
             transform: scale(2.5) translateY(0);
         }
 
-        /* Media query agar di HP tidak terlalu besar menutupi layar penuh */
         @media (max-width: 640px) {
             .dice-scaler.cinematic-scale {
                 transform: scale(2) translateY(0);
@@ -155,7 +147,6 @@
 </head>
 <body class="bg-[#f8fafc] min-h-screen text-slate-800 antialiased selection:bg-slate-200">
 
-    <!-- DIPERBARUI: Container utama dilepas dari ikatan relative z-10 -->
     <div class="max-w-6xl mx-auto py-8 px-5 sm:px-8 lg:py-12">
         
         <!-- Header -->
@@ -172,14 +163,15 @@
         <main class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             
             <!-- KOLOM KIRI: Kontrol Dadu -->
-            <!-- DIPERBARUI: Tambahkan z-50 di section ini agar dia membungkus overlay & dadu dengan prioritas tertinggi -->
             <section class="lg:col-span-4 lg:sticky lg:top-8 z-50 bg-white rounded-3xl shadow-sm border border-slate-200/60 p-6 sm:p-8 flex flex-col justify-between">
                 
                 <div class="flex flex-col items-center">
                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Area Uji Coba</div>
                     
+                    <!-- PERBAIKAN: Elemen overlay disisipkan kembali ke sini -->
+                    <div id="overlay"></div>
+
                     <!-- DADU CONTAINER -->
-                    <!-- Placeholder untuk menahan posisi layout saat dadu terbang ke tengah layar -->
                     <div id="dice-placeholder" style="width: 100px; height: 100px; margin: 2rem auto; display: none;"></div>
                     
                     <div id="dice-scene" class="dice-scene">
@@ -412,7 +404,6 @@
             const resultText = document.getElementById('result-text');
             const rollBtn = document.getElementById('roll-btn');
             
-            // Elemen untuk mode cinematic
             const diceScene = document.getElementById('dice-scene');
             const diceScaler = document.getElementById('dice-scaler');
             const diceCube = document.getElementById('dice-cube');
@@ -426,10 +417,9 @@
             resultText.innerHTML = `<span class="animate-pulse">Memutar dadu...</span>`;
 
             // 2. AKTIFKAN MODE CINEMATIC
-            overlay.classList.add('active'); // Gelapkan background
-            dicePlaceholder.style.display = 'block'; // Tahan layout yang ditinggalkan dadu
+            overlay.classList.add('active'); 
+            dicePlaceholder.style.display = 'block'; 
             
-            // Beri jeda sangat kecil agar transisi posisi terlihat mulus (dari relatif ke fixed)
             setTimeout(() => {
                 diceScene.classList.add('cinematic');
                 diceScaler.classList.add('cinematic-scale');
@@ -449,40 +439,34 @@
                 case 6: targetX = 180; targetY = 0; break;    
             }
 
-            // Tambah putaran liar (lebih banyak putaran karena ada mode cinematic)
             let spinsX = Math.floor(currentRotX / 360) + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 4) + 3);
             let spinsY = Math.floor(currentRotY / 360) + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 4) + 3);
 
             currentRotX = targetX + (spinsX * 360);
             currentRotY = targetY + (spinsY * 360);
 
-            // Putar dadu di tengah layar
             diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
 
-            // 4. SETELAH ANIMASI SELESAI (1.5 detik), KEMBALIKAN KE TEMPAT SEMULA
+            // 4. SETELAH ANIMASI SELESAI
             setTimeout(() => {
-                // Matikan mode cinematic
                 overlay.classList.remove('active');
                 diceScaler.classList.remove('cinematic-scale');
                 diceScene.classList.remove('cinematic');
                 dicePlaceholder.style.display = 'none';
 
-                // Update teks hasil
                 resultText.innerHTML = `Hasil: <span class="font-bold text-slate-900 ml-1 text-base">${angkaKeluar}</span>`;
 
-                // Update Data & UI
                 frequencies[finalResultIndex]++;
                 totalRolls++;
                 renderTable();
                 highlightRow(angkaKeluar);
                 updateChart(); 
 
-                // Kembalikan tombol
                 isRolling = false;
                 rollBtn.disabled = false;
                 rollBtn.classList.remove('opacity-90', 'cursor-not-allowed');
                 rollBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Lempar Dadu`;
-            }, 1600); // 1.6 detik (menyesuaikan durasi transisi css)
+            }, 1600); 
         }
 
         function resetData() {
