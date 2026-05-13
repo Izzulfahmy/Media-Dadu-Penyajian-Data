@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ayo Main Lempar Dadu! 🎲</title>
     
-    <!-- Favicon Logo (Pastikan file Logo.png ada di folder yang sama) -->
+    <!-- Favicon Logo -->
     <link rel="icon" href="Logo.png" type="image/png">
     
-    <!-- Google Fonts: Nunito (Ramah anak) -->
+    <!-- Google Fonts: Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
@@ -61,7 +61,7 @@
             width: 100px;
             height: 100px;
             background: #ffffff;
-            border: 4px solid #e2e8f0; /* Border tebal seperti mainan plastik */
+            border: 4px solid #e2e8f0; 
             border-radius: 20px; 
             box-shadow: 
                 inset 0 0 15px rgba(0,0,0,0.05), 
@@ -75,6 +75,7 @@
             align-items: center;
             backface-visibility: hidden;
             background-color: #f8fafc; 
+            overflow: hidden; /* Mencegah gambar keluar dari sudut membulat */
         }
 
         .dice-face.front  { transform: rotateY(0deg) translateZ(50px); }
@@ -84,11 +85,13 @@
         .dice-face.top    { transform: rotateX(90deg) translateZ(50px); }
         .dice-face.bottom { transform: rotateX(-90deg) translateZ(50px); }
 
+        /* Gaya Titik Dadu */
         .pip {
             width: 20px;
             height: 20px;
             border-radius: 50%;
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            z-index: 2;
         }
         
         /* Warna-warni Titik Dadu */
@@ -98,6 +101,26 @@
         .face-4 .pip { background: #ffa502; } .face-4 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-4 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-4 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-4 .p4 { grid-area: 3 / 3 / 4 / 4; }
         .face-5 .pip { background: #9c88ff; } .face-5 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-5 .p2 { grid-area: 1 / 3 / 2 / 4; } .face-5 .p3 { grid-area: 2 / 2 / 3 / 3; } .face-5 .p4 { grid-area: 3 / 1 / 4 / 2; } .face-5 .p5 { grid-area: 3 / 3 / 4 / 4; }
         .face-6 .pip { background: #ff7f50; } .face-6 .p1 { grid-area: 1 / 1 / 2 / 2; } .face-6 .p2 { grid-area: 2 / 1 / 3 / 2; } .face-6 .p3 { grid-area: 3 / 1 / 4 / 2; } .face-6 .p4 { grid-area: 1 / 3 / 2 / 4; } .face-6 .p5 { grid-area: 2 / 3 / 3 / 4; } .face-6 .p6 { grid-area: 3 / 3 / 4 / 4; }
+
+        /* =========================================
+           TEMA GAMBAR BENTANG ALAM
+           ========================================= */
+        .dice-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 5;
+            display: none; /* Sembunyikan secara default */
+        }
+
+        /* Logika penampil gambar / titik */
+        .theme-alam .dice-img:not(.failed) {
+            display: block; /* Tampilkan gambar jika tema alam aktif & tidak error */
+        }
+        .theme-alam .dice-face:not(.fallback-pips) .pip {
+            display: none; /* Sembunyikan titik angka jika gambar tampil sempurna */
+        }
 
         /* =========================================
            CUSTOM SCROLLBAR
@@ -164,21 +187,18 @@
     <!-- OVERLAY LAYAR BURAM -->
     <div id="overlay"></div>
 
-    <!-- FILTER TAMPILAN (KIRI ATAS) -->
-    <div class="fixed top-3 left-3 sm:top-5 sm:left-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 p-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 transition-all flex items-center gap-1 sm:gap-2">
-        <span class="hidden md:inline text-sm font-bold text-indigo-800">👀 Tampilan:</span>
-        <select id="view-filter" onchange="toggleViewFilter()" class="bg-transparent text-indigo-700 text-xs sm:text-sm font-black outline-none cursor-pointer appearance-none text-center pr-2">
-            <option value="both">Tabel & Grafik 📊</option>
-            <option value="chart">Hanya Grafik 📈</option>
-            <option value="table">Hanya Tabel 📝</option>
-        </select>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
-    </div>
+    <!-- TOMBOL SETTING (PENGATURAN) -->
+    <button onclick="toggleSettings()" class="fixed top-3 left-3 sm:top-5 sm:left-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 text-indigo-700 p-2 sm:px-3 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 hover:scale-105 font-black flex items-center justify-center transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </button>
 
     <!-- TOMBOL LAYAR PENUH (KANAN ATAS) -->
-    <button onclick="toggleFullScreen()" class="fixed top-3 right-3 sm:top-5 sm:right-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 text-indigo-700 p-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 font-black flex items-center gap-2 transition-all">
-        <svg id="fs-icon-enter" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-        <svg id="fs-icon-exit" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7M4 10h6m0 0V4m0 6l-7-7m17 11h-6m0 0v6m0-6l7 7" /></svg>
+    <button onclick="toggleFullScreen()" class="fixed top-3 right-3 sm:top-5 sm:right-5 z-[100] bg-white/90 backdrop-blur-md border-2 border-indigo-200 text-indigo-700 p-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-md hover:bg-indigo-50 hover:scale-105 font-black flex items-center gap-2 transition-all">
+        <svg id="fs-icon-enter" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+        <svg id="fs-icon-exit" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-7 sm:w-7 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7M4 10h6m0 0V4m0 6l-7-7m17 11h-6m0 0v6m0-6l7 7" /></svg>
         <span id="fs-text" class="hidden sm:inline tracking-wide">Layar Penuh</span>
     </button>
 
@@ -189,7 +209,7 @@
                 Ayo Main Lempar Dadu! 🎲
             </h1>
             <p class="text-slate-600 text-base sm:text-xl font-bold max-w-2xl mx-auto bg-white/50 inline-block px-4 py-1.5 sm:px-6 sm:py-2 rounded-full shadow-sm border border-white">
-                Pencet tombolnya dan lihat keajaibannya! ✨
+                Pencet tombolnya dan Lihat grafiknya! ✨
             </p>
         </header>
 
@@ -199,9 +219,8 @@
             <section class="lg:col-span-4 lg:sticky lg:top-4 bg-white rounded-[2rem] shadow-xl border-4 border-indigo-100 p-5 sm:p-6 flex flex-col justify-between overflow-hidden">
                 <div class="flex flex-col items-center">
                     
-                    <!-- AREA JUDUL UJI COBA & BADGE JUMLAH LEMPARAN (DIPINDAHKAN KE SINI) -->
                     <div class="w-full flex items-center justify-between mb-2">
-                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Area Uji Coba</div>
+                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Area Lempar Dadu</div>
                         <div class="bg-cyan-100 text-cyan-800 text-xs sm:text-sm font-black px-3 py-1 rounded-xl flex items-center gap-1.5 border-2 border-cyan-200 shadow-sm">
                             🏆 <span id="total-rolls-badge">0 Kali</span>
                         </div>
@@ -212,12 +231,31 @@
                     <div id="dice-scene" class="dice-scene">
                         <div id="dice-scaler" class="dice-scaler">
                             <div id="dice-cube" class="dice-cube">
-                                <div class="dice-face front face-1"><div class="pip"></div></div>
-                                <div class="dice-face right face-2"><div class="pip p1"></div><div class="pip p2"></div></div>
-                                <div class="dice-face top face-3"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div></div>
-                                <div class="dice-face bottom face-4"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div></div>
-                                <div class="dice-face left face-5"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div></div>
-                                <div class="dice-face back face-6"><div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div><div class="pip p6"></div></div>
+                                <!-- Perhatikan penambahan gambar tema di sini -->
+                                <div class="dice-face front face-1">
+                                    <img src="1.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip"></div>
+                                </div>
+                                <div class="dice-face right face-2">
+                                    <img src="2.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip p1"></div><div class="pip p2"></div>
+                                </div>
+                                <div class="dice-face top face-3">
+                                    <img src="3.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div>
+                                </div>
+                                <div class="dice-face bottom face-4">
+                                    <img src="4.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div>
+                                </div>
+                                <div class="dice-face left face-5">
+                                    <img src="5.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div>
+                                </div>
+                                <div class="dice-face back face-6">
+                                    <img src="6.jpeg" class="dice-img" onerror="handleImgError(this)">
+                                    <div class="pip p1"></div><div class="pip p2"></div><div class="pip p3"></div><div class="pip p4"></div><div class="pip p5"></div><div class="pip p6"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -248,8 +286,7 @@
                     <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-50 rounded-full opacity-50 blur-2xl"></div>
                     <div class="flex items-center justify-between mb-6 relative z-10">
                         <div>
-                            <h2 class="text-xl sm:text-2xl font-black text-cyan-700">Grafik Balok Warna-Warni</h2>
-                            <p class="text-xs sm:text-sm font-bold text-cyan-500 mt-1">Siapa yang paling tinggi?</p>
+                            <h2 class="text-xl sm:text-2xl font-black text-cyan-700">Grafik Diagram Batang</h2>
                         </div>
                     </div>
                     <div class="w-full h-[220px] sm:h-[250px] relative z-10">
@@ -283,12 +320,51 @@
         </main>
     </div>
 
-    <!-- MODAL KONFIRMASI RESET KUSTOM -->
+    <!-- MODAL PENGATURAN -->
+    <div id="settings-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="settings-modal-backdrop" onclick="closeSettings()"></div>
+        <div class="relative bg-white rounded-[2rem] shadow-2xl border-4 border-indigo-200 p-6 sm:p-8 max-w-sm w-[90%] transform scale-95 opacity-0 transition-all duration-300" id="settings-modal-content">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl sm:text-2xl font-black text-indigo-700 flex items-center gap-2">⚙️ Pengaturan</h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-red-500 font-bold text-3xl leading-none">&times;</button>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Tampilan Layar -->
+                <div class="bg-indigo-50 p-4 rounded-xl border-2 border-indigo-100">
+                    <h4 class="font-bold text-indigo-800 mb-2">Tampilan Layar:</h4>
+                    <label class="flex items-center gap-2 cursor-pointer mb-2 text-slate-700 font-semibold">
+                        <input type="radio" name="view-setting" value="both" checked class="w-5 h-5 text-indigo-600 focus:ring-indigo-500" onchange="applySettings()"> Keduanya (Tabel & Grafik)
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer mb-2 text-slate-700 font-semibold">
+                        <input type="radio" name="view-setting" value="chart" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500" onchange="applySettings()"> Hanya Grafik 📈
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-semibold">
+                        <input type="radio" name="view-setting" value="table" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500" onchange="applySettings()"> Hanya Tabel 📝
+                    </label>
+                </div>
+
+                <!-- Tema Dadu -->
+                <div class="bg-pink-50 p-4 rounded-xl border-2 border-pink-100">
+                    <h4 class="font-bold text-pink-800 mb-2">Tema Dadu:</h4>
+                    <label class="flex items-center gap-2 cursor-pointer mb-2 text-slate-700 font-semibold">
+                        <input type="radio" name="theme-setting" value="angka" checked class="w-5 h-5 text-pink-500 focus:ring-pink-500" onchange="applySettings()"> Angka Titik 🎲
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-700 font-semibold">
+                        <input type="radio" name="theme-setting" value="alam" class="w-5 h-5 text-pink-500 focus:ring-pink-500" onchange="applySettings()"> Bentang Alam ⛰️
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="closeSettings()" class="w-full mt-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-black rounded-xl transition-colors border-2 border-indigo-600 shadow-md">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI RESET -->
     <div id="reset-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center">
-        <!-- Latar Belakang Gelap/Blur -->
         <div class="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="reset-modal-backdrop" onclick="hideResetModal()"></div>
-        
-        <!-- Kotak Modal -->
         <div class="relative bg-white rounded-[2rem] shadow-2xl border-4 border-red-200 p-6 sm:p-8 max-w-sm w-[90%] transform scale-95 opacity-0 transition-all duration-300" id="reset-modal-content">
             <div class="text-center">
                 <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-red-200">
@@ -296,14 +372,9 @@
                 </div>
                 <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2">Mulai Dari Awal?</h3>
                 <p class="text-slate-500 font-bold text-sm sm:text-base mb-6">Yakin mau hapus semua skor? Data yang sudah dihapus tidak bisa kembali lho! 🤔</p>
-                
                 <div class="flex flex-col sm:flex-row gap-3">
-                    <button onclick="hideResetModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl transition-colors border-2 border-slate-200">
-                        ❌ Batal
-                    </button>
-                    <button onclick="confirmResetData()" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl shadow-md shadow-red-500/30 transition-colors border-2 border-red-600">
-                        ✅ Ya, Hapus!
-                    </button>
+                    <button onclick="hideResetModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl transition-colors border-2 border-slate-200">❌ Batal</button>
+                    <button onclick="confirmResetData()" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl shadow-md transition-colors border-2 border-red-600">✅ Ya, Hapus!</button>
                 </div>
             </div>
         </div>
@@ -326,29 +397,80 @@
             initChart();
         });
 
-        // Filter Dropdown
-        function toggleViewFilter() {
-            const filterValue = document.getElementById('view-filter').value;
+        // ==========================================
+        // LOGIKA PENGATURAN (SETTINGS & THEME)
+        // ==========================================
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            const backdrop = document.getElementById('settings-modal-backdrop');
+            const content = document.getElementById('settings-modal-content');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settings-modal');
+            const backdrop = document.getElementById('settings-modal-backdrop');
+            const content = document.getElementById('settings-modal-content');
+            
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function applySettings() {
+            // Terapkan Layout View
+            const viewValue = document.querySelector('input[name="view-setting"]:checked').value;
             const chartCont = document.getElementById('chart-container');
             const tableCont = document.getElementById('table-container');
 
-            if (filterValue === 'both') {
+            if (viewValue === 'both') {
                 chartCont.style.display = 'block'; tableCont.style.display = 'block';
-            } else if (filterValue === 'chart') {
+            } else if (viewValue === 'chart') {
                 chartCont.style.display = 'block'; tableCont.style.display = 'none';
-            } else if (filterValue === 'table') {
+            } else if (viewValue === 'table') {
                 chartCont.style.display = 'none'; tableCont.style.display = 'block';
+            }
+
+            // Terapkan Tema Dadu
+            const themeValue = document.querySelector('input[name="theme-setting"]:checked').value;
+            const diceCube = document.getElementById('dice-cube');
+            
+            if (themeValue === 'alam') {
+                diceCube.classList.add('theme-alam');
+            } else {
+                diceCube.classList.remove('theme-alam');
             }
         }
 
-        // Generate Turus
+        // Tangani Error Jika Gambar Tidak Ada
+        function handleImgError(imgElement) {
+            imgElement.classList.add('failed'); // Tandai error
+            imgElement.parentElement.classList.add('fallback-pips'); // Munculkan titik pips
+        }
+
+        // ==========================================
+        // LOGIKA TABEL & GRAFIK (TIDAK BERUBAH)
+        // ==========================================
         function generateTallyMarks(count) {
-            if (count === 0) return ''; // Kosongkan jika 0
-            
+            if (count === 0) return ''; 
             let html = '<div class="flex flex-wrap gap-1.5 items-center py-0.5 min-h-[28px]">';
             let fullGroups = Math.floor(count / 5);
             let remainder = count % 5;
-            
             const strokeColor = "#8b5cf6"; 
             
             const svg5 = `
@@ -372,7 +494,6 @@
             return html;
         }
 
-        // Chart.js
         function initChart() {
             const ctx = document.getElementById('frequencyChart').getContext('2d');
             Chart.defaults.font.family = "'Nunito', sans-serif";
@@ -386,46 +507,31 @@
                         label: 'Frekuensi',
                         data: frequencies,
                         backgroundColor: [
-                            'rgba(255, 71, 87, 0.8)',  // Merah
-                            'rgba(30, 144, 255, 0.8)', // Biru
-                            'rgba(46, 213, 115, 0.8)', // Hijau
-                            'rgba(255, 165, 2, 0.8)',  // Oranye
-                            'rgba(156, 136, 255, 0.8)',// Ungu
-                            'rgba(255, 127, 80, 0.8)'  // Pink
+                            'rgba(255, 71, 87, 0.8)', 'rgba(30, 144, 255, 0.8)', 'rgba(46, 213, 115, 0.8)', 
+                            'rgba(255, 165, 2, 0.8)', 'rgba(156, 136, 255, 0.8)', 'rgba(255, 127, 80, 0.8)'
                         ],
-                        borderColor: [
-                            '#ff4757', '#1e90ff', '#2ed573', '#ffa502', '#9c88ff', '#ff7f50'
-                        ],
-                        borderWidth: 3, 
-                        borderRadius: 10, 
-                        barPercentage: 0.7 
+                        borderColor: ['#ff4757', '#1e90ff', '#2ed573', '#ffa502', '#9c88ff', '#ff7f50'],
+                        borderWidth: 3, borderRadius: 10, barPercentage: 0.7 
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            border: { display: false },
+                            beginAtZero: true, border: { display: false },
                             grid: { color: '#f1f5f9', drawTicks: false },
                             ticks: { stepSize: 1, padding: 10, font: { size: 14, weight: 'bold' } }
                         },
                         x: {
-                            border: { display: false },
-                            grid: { display: false },
+                            border: { display: false }, grid: { display: false },
                             ticks: { padding: 10, font: { size: 14, weight: 'bold' } }
                         }
                     },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1e293b',
-                            padding: 16,
-                            cornerRadius: 12,
-                            displayColors: false,
-                            titleFont: { size: 16, weight: 'bold', family: 'Nunito' },
-                            bodyFont: { size: 20, weight: 'black', family: 'Nunito' }
+                            backgroundColor: '#1e293b', padding: 16, cornerRadius: 12, displayColors: false,
+                            titleFont: { size: 16, weight: 'bold', family: 'Nunito' }, bodyFont: { size: 20, weight: 'black', family: 'Nunito' }
                         }
                     },
                     animation: { duration: 600, easing: 'easeOutBounce' } 
@@ -440,7 +546,6 @@
             }
         }
 
-        // Render Tabel
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = ''; 
@@ -477,7 +582,9 @@
             setTimeout(() => { row.classList.remove('bg-pink-100'); }, 800);
         }
 
-        // Logika Lempar Dadu Cinematic
+        // ==========================================
+        // LOGIKA LEMPAR DADU CINEMATIC
+        // ==========================================
         function rollDice() {
             if (isRolling) return; 
             isRolling = true;
@@ -490,18 +597,15 @@
             const overlay = document.getElementById('overlay');
             const dicePlaceholder = document.getElementById('dice-placeholder');
             
-            // State tombol loading
             rollBtn.disabled = true;
             rollBtn.innerHTML = `⏳ Mengocok...`;
             resultText.innerHTML = `<span class="animate-pulse">Memutar dadu...</span>`;
 
-            // Mulai animasi
             dicePlaceholder.style.display = 'block'; 
             diceScene.classList.add('cinematic');
-            document.body.appendChild(diceScene); // Pindah paksa keluar div utama
+            document.body.appendChild(diceScene); 
             overlay.classList.add('active'); 
 
-            // Hitung hasil acak
             const finalResultIndex = Math.floor(Math.random() * 6); 
             const angkaKeluar = finalResultIndex + 1;
             
@@ -521,26 +625,21 @@
             currentRotX = targetX + (spinsX * 360);
             currentRotY = targetY + (spinsY * 360);
 
-            // JEDA PENTING: Browser butuh waktu sedikit (50ms) setelah memindahkan elemen (appendChild) 
-            // agar animasi CSS transisi kocokan dadu bisa berjalan dengan mulus.
             setTimeout(() => {
                 diceScaler.classList.add('cinematic-scale');
                 diceCube.style.transform = `rotateX(${currentRotX}deg) rotateY(${currentRotY}deg)`;
             }, 50);
 
-            // Setelah animasi berputar selesai
             setTimeout(() => {
                 overlay.classList.remove('active');
                 diceScaler.classList.remove('cinematic-scale');
                 diceScene.classList.remove('cinematic');
                 
-                // Kembalikan dadu ke tempat asal
                 dicePlaceholder.parentNode.insertBefore(diceScene, dicePlaceholder);
                 dicePlaceholder.style.display = 'none';
 
                 resultText.innerHTML = `Hasil: <span class="font-black text-indigo-700 ml-1 text-lg">${angkaKeluar}</span>`;
 
-                // Update skor
                 frequencies[finalResultIndex]++;
                 totalRolls++;
                 renderTable();
@@ -553,10 +652,11 @@
             }, 1600); 
         }
 
-        // Tampilkan Modal Reset
+        // ==========================================
+        // LOGIKA RESET DATA
+        // ==========================================
         function resetData() {
-            if (totalRolls === 0) return; // Jika belum ada data, jangan lakukan apa-apa
-            
+            if (totalRolls === 0) return;
             const modal = document.getElementById('reset-modal');
             const backdrop = document.getElementById('reset-modal-backdrop');
             const content = document.getElementById('reset-modal-content');
@@ -564,7 +664,6 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
-            // Beri jeda sangat kecil agar transisi CSS berjalan lancar
             setTimeout(() => {
                 backdrop.classList.remove('opacity-0');
                 backdrop.classList.add('opacity-100');
@@ -573,7 +672,6 @@
             }, 10);
         }
 
-        // Sembunyikan Modal Reset
         function hideResetModal() {
             const modal = document.getElementById('reset-modal');
             const backdrop = document.getElementById('reset-modal-backdrop');
@@ -584,14 +682,12 @@
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
             
-            // Sembunyikan elemen sepenuhnya setelah animasi selesai
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }, 300);
         }
 
-        // Eksekusi Reset Data yang Sesungguhnya
         function confirmResetData() {
             frequencies = [0, 0, 0, 0, 0, 0];
             totalRolls = 0;
@@ -601,12 +697,12 @@
             document.getElementById('dice-cube').style.transform = `rotateX(0deg) rotateY(0deg)`;
             renderTable();
             updateChart(); 
-            
-            // Tutup modal setelah reset
             hideResetModal();
         }
 
-        // Fullscreen Toggle
+        // ==========================================
+        // LOGIKA FULLSCREEN
+        // ==========================================
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
