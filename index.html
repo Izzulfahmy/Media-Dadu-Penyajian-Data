@@ -198,7 +198,14 @@
             <!-- KOLOM KIRI: Dadu -->
             <section class="lg:col-span-4 lg:sticky lg:top-4 bg-white rounded-[2rem] shadow-xl border-4 border-indigo-100 p-5 sm:p-6 flex flex-col justify-between overflow-hidden">
                 <div class="flex flex-col items-center">
-                    <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">Area Uji Coba</div>
+                    
+                    <!-- AREA JUDUL UJI COBA & BADGE JUMLAH LEMPARAN (DIPINDAHKAN KE SINI) -->
+                    <div class="w-full flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Area Uji Coba</div>
+                        <div class="bg-cyan-100 text-cyan-800 text-xs sm:text-sm font-black px-3 py-1 rounded-xl flex items-center gap-1.5 border-2 border-cyan-200 shadow-sm">
+                            🏆 <span id="total-rolls-badge">0 Kali</span>
+                        </div>
+                    </div>
 
                     <div id="dice-placeholder" style="width: 100px; height: 100px; margin: 2rem auto; display: none;"></div>
                     
@@ -243,9 +250,6 @@
                         <div>
                             <h2 class="text-xl sm:text-2xl font-black text-cyan-700">Grafik Balok Warna-Warni</h2>
                             <p class="text-xs sm:text-sm font-bold text-cyan-500 mt-1">Siapa yang paling tinggi?</p>
-                        </div>
-                        <div class="bg-cyan-100 text-cyan-800 text-xs sm:text-sm font-black px-3 py-2 rounded-xl flex items-center gap-2 border-2 border-cyan-200">
-                            🏆 <span id="total-rolls-badge">0 Kali</span>
                         </div>
                     </div>
                     <div class="w-full h-[220px] sm:h-[250px] relative z-10">
