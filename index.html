@@ -189,7 +189,7 @@
                 Ayo Main Lempar Dadu! 🎲
             </h1>
             <p class="text-slate-600 text-base sm:text-xl font-bold max-w-2xl mx-auto bg-white/50 inline-block px-4 py-1.5 sm:px-6 sm:py-2 rounded-full shadow-sm border border-white">
-                Pencet tombolnya dan lihat grafiknya! ✨
+                Pencet tombolnya dan lihat keajaibannya! ✨
             </p>
         </header>
 
@@ -201,6 +201,7 @@
                     
                     <!-- AREA JUDUL UJI COBA & BADGE JUMLAH LEMPARAN (DIPINDAHKAN KE SINI) -->
                     <div class="w-full flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Area Uji Coba</div>
                         <div class="bg-cyan-100 text-cyan-800 text-xs sm:text-sm font-black px-3 py-1 rounded-xl flex items-center gap-1.5 border-2 border-cyan-200 shadow-sm">
                             🏆 <span id="total-rolls-badge">0 Kali</span>
                         </div>
@@ -247,7 +248,8 @@
                     <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-50 rounded-full opacity-50 blur-2xl"></div>
                     <div class="flex items-center justify-between mb-6 relative z-10">
                         <div>
-                            <h2 class="text-xl sm:text-2xl font-black text-cyan-700">Grafik Diagram Batang</h2>
+                            <h2 class="text-xl sm:text-2xl font-black text-cyan-700">Grafik Balok Warna-Warni</h2>
+                            <p class="text-xs sm:text-sm font-bold text-cyan-500 mt-1">Siapa yang paling tinggi?</p>
                         </div>
                     </div>
                     <div class="w-full h-[220px] sm:h-[250px] relative z-10">
@@ -279,6 +281,32 @@
 
             </section>
         </main>
+    </div>
+
+    <!-- MODAL KONFIRMASI RESET KUSTOM -->
+    <div id="reset-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center">
+        <!-- Latar Belakang Gelap/Blur -->
+        <div class="absolute inset-0 bg-indigo-900/40 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="reset-modal-backdrop" onclick="hideResetModal()"></div>
+        
+        <!-- Kotak Modal -->
+        <div class="relative bg-white rounded-[2rem] shadow-2xl border-4 border-red-200 p-6 sm:p-8 max-w-sm w-[90%] transform scale-95 opacity-0 transition-all duration-300" id="reset-modal-content">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-red-200">
+                    <span class="text-3xl">🗑️</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-800 mb-2">Mulai Dari Awal?</h3>
+                <p class="text-slate-500 font-bold text-sm sm:text-base mb-6">Yakin mau hapus semua skor? Data yang sudah dihapus tidak bisa kembali lho! 🤔</p>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="hideResetModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black rounded-xl transition-colors border-2 border-slate-200">
+                        ❌ Batal
+                    </button>
+                    <button onclick="confirmResetData()" class="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-black rounded-xl shadow-md shadow-red-500/30 transition-colors border-2 border-red-600">
+                        ✅ Ya, Hapus!
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -525,19 +553,57 @@
             }, 1600); 
         }
 
-        // Reset Data
+        // Tampilkan Modal Reset
         function resetData() {
-            if (totalRolls === 0) return;
-            if (confirm("Yakin mau hapus semua skor dan mulai dari awal? 🤔")) {
-                frequencies = [0, 0, 0, 0, 0, 0];
-                totalRolls = 0;
-                document.getElementById('result-text').innerHTML = `<span class="text-sm sm:text-base font-bold text-indigo-400">Pencet tombol di bawah 👇</span>`;
-                currentRotX = 0;
-                currentRotY = 0;
-                document.getElementById('dice-cube').style.transform = `rotateX(0deg) rotateY(0deg)`;
-                renderTable();
-                updateChart(); 
-            }
+            if (totalRolls === 0) return; // Jika belum ada data, jangan lakukan apa-apa
+            
+            const modal = document.getElementById('reset-modal');
+            const backdrop = document.getElementById('reset-modal-backdrop');
+            const content = document.getElementById('reset-modal-content');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Beri jeda sangat kecil agar transisi CSS berjalan lancar
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                backdrop.classList.add('opacity-100');
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // Sembunyikan Modal Reset
+        function hideResetModal() {
+            const modal = document.getElementById('reset-modal');
+            const backdrop = document.getElementById('reset-modal-backdrop');
+            const content = document.getElementById('reset-modal-content');
+            
+            backdrop.classList.remove('opacity-100');
+            backdrop.classList.add('opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            // Sembunyikan elemen sepenuhnya setelah animasi selesai
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // Eksekusi Reset Data yang Sesungguhnya
+        function confirmResetData() {
+            frequencies = [0, 0, 0, 0, 0, 0];
+            totalRolls = 0;
+            document.getElementById('result-text').innerHTML = `<span class="text-sm sm:text-base font-bold text-indigo-400">Pencet tombol di bawah 👇</span>`;
+            currentRotX = 0;
+            currentRotY = 0;
+            document.getElementById('dice-cube').style.transform = `rotateX(0deg) rotateY(0deg)`;
+            renderTable();
+            updateChart(); 
+            
+            // Tutup modal setelah reset
+            hideResetModal();
         }
 
         // Fullscreen Toggle
